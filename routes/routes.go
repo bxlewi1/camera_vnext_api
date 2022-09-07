@@ -14,7 +14,7 @@ var App *fiber.App
 
 func init() {
 	App = fiber.New(fiber.Config{
-		BodyLimit: 4194304 * 1024,
+		BodyLimit: 100 * 1073741824,
 	})
 
 	addApiRoutes()
