@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"time"
 )
 
@@ -29,6 +30,34 @@ func addApiRoutes() {
 			"derp": "ERRYTHING IS AWESOME",
 			"date": time.Now(),
 		})
+	})
+
+	api.Post("POST", func(ctx *fiber.Ctx) error {
+		fileName := ctx.Query("FileName")
+		if len(fileName) == 0 {
+			logger.Println("FileName not given")
+			return ctx.SendStatus(http.StatusBadRequest)
+		}
+
+		dirPath := path.Join(config.Instance.AssetPath)
+		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+			err = os.MkdirAll(dirPath, 0755)
+			if err != nil {
+				logger.Println(err.Error())
+			}
+		}
+
+		body := ctx.Body()
+
+		if len(body) > 0 {
+			err := os.WriteFile(filepath.Join(config.Instance.AssetPath, fileName), body, 0755)
+			if err != nil {
+				logger.Println(err.Error())
+				return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
+			}
+		}
+
+		return ctx.SendStatus(http.StatusOK)
 	})
 
 	api.Post("", func(ctx *fiber.Ctx) error {
