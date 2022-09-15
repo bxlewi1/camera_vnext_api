@@ -36,7 +36,7 @@ func addApiRoutes() {
 	})
 
 	api.Post("POST", func(ctx *fiber.Ctx) error {
-		fileName := ctx.Query("FileName")
+		fileName := ctx.Query("fileName")
 		if len(fileName) == 0 {
 			logger.Println("FileName not given")
 			return ctx.SendStatus(http.StatusBadRequest)
