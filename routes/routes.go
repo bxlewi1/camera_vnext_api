@@ -3,6 +3,7 @@ package routes
 import (
 	"camera_vnext_api/config"
 	"github.com/gofiber/fiber/v2"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -17,6 +18,8 @@ func init() {
 	App = fiber.New(fiber.Config{
 		BodyLimit: 100 * 1024 * 1024 * 1024,
 	})
+
+	App.Server().StreamRequestBody = true
 
 	addApiRoutes()
 }
@@ -47,14 +50,19 @@ func addApiRoutes() {
 			}
 		}
 
-		body := ctx.Body()
+		reader := ctx.Context().RequestBodyStream()
 
-		if len(body) > 0 {
-			err := os.WriteFile(filepath.Join(config.Instance.AssetPath, fileName), body, 0755)
-			if err != nil {
-				logger.Println(err.Error())
-				return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
-			}
+		outFile, err := os.Create(filepath.Join(dirPath, fileName))
+		if err != nil {
+			logger.Println(err.Error())
+			return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
+		}
+		defer outFile.Close()
+
+		_, err = io.Copy(outFile, reader)
+		if err != nil {
+			logger.Println(err.Error())
+			return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 		}
 
 		return ctx.SendStatus(http.StatusOK)
