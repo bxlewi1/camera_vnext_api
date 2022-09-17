@@ -20,6 +20,7 @@ func init() {
 	})
 
 	App.Server().StreamRequestBody = true
+	App.Server().MaxRequestBodySize = 100 * 1024 * 1024 * 1024
 
 	addApiRoutes()
 }
