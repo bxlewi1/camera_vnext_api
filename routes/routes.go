@@ -51,6 +51,10 @@ func addApiRoutes() {
 			}
 		}
 
+		if _, err := os.Stat(path.Join(dirPath, fileName)); os.IsExist(err) {
+			fileName = "1." + fileName
+		}
+
 		reader := ctx.Context().RequestBodyStream()
 
 		outFile, err := os.Create(filepath.Join(dirPath, fileName))
