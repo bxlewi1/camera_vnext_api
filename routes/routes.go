@@ -3,6 +3,7 @@ package routes
 import (
 	"camera_vnext_api/config"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/utils"
 	"io"
 	"log"
 	"net/http"
@@ -36,6 +37,11 @@ func addApiRoutes() {
 		})
 	})
 
+	api.Get("guid", func(ctx *fiber.Ctx) error {
+		uuid := utils.UUIDv4()
+		return ctx.SendString(uuid)
+	})
+
 	api.Post("POST", func(ctx *fiber.Ctx) error {
 		fileName := ctx.Query("fileName")
 		if len(fileName) == 0 {
@@ -65,36 +71,6 @@ func addApiRoutes() {
 		defer outFile.Close()
 
 		_, err = io.Copy(outFile, reader)
-		if err != nil {
-			logger.Println(err.Error())
-			return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
-		}
-
-		return ctx.SendStatus(http.StatusOK)
-	})
-
-	api.Post("", func(ctx *fiber.Ctx) error {
-		fileName := ctx.FormValue("FileName")
-		if len(fileName) == 0 {
-			logger.Println("FileName not given")
-			return ctx.SendStatus(http.StatusBadRequest)
-		}
-
-		dirPath := path.Join(config.Instance.AssetPath)
-		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-			err = os.MkdirAll(dirPath, 0755)
-			if err != nil {
-				logger.Println(err.Error())
-			}
-		}
-
-		upload, err := ctx.FormFile("Upload")
-		if err != nil {
-			logger.Println(err.Error())
-			return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
-		}
-
-		err = ctx.SaveFile(upload, path.Join(dirPath, fileName))
 		if err != nil {
 			logger.Println(err.Error())
 			return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
