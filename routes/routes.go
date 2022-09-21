@@ -22,6 +22,8 @@ func init() {
 
 	App.Server().StreamRequestBody = true
 	App.Server().MaxRequestBodySize = 100 * 1024 * 1024 * 1024
+	App.Server().ReadTimeout = time.Minute * 20
+	App.Server().WriteTimeout = time.Minute * 20
 
 	addApiRoutes()
 }
