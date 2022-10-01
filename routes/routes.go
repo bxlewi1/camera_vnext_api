@@ -16,7 +16,11 @@ import (
 var App *fiber.App
 
 func init() {
-	App = fiber.New()
+	App = fiber.New(fiber.Config{
+		StreamRequestBody: true,
+		BodyLimit:         -1,
+	})
+
 	addApiRoutes()
 }
 
